@@ -225,6 +225,19 @@ describe('rendered client script', () => {
     expect(html).toContain('/api/ipapi?q=${encodeURIComponent(ip)}');
   });
 
+  it('falls back from ipapi.is to the cmliussss ipinfo proxy and relabels the card', async () => {
+    const response = await runRequest(new Request('https://example.com/'));
+    const html = await response.text();
+
+    expect(html).toContain('https://api.ipapi.is/');
+    expect(html).toContain('https://api.cmliussss.net/api/ipinfo?_t=${Date.now()}');
+    expect(html).not.toContain('https://api.ipapi.cmliussss.net/');
+    expect(html).toContain("sourceName: 'ipinfo.io'");
+    expect(html).toContain("sourceUrl: 'https://ipinfo.io/'");
+    expect(html).toContain('countryCode: data.country_code || data.country || data.location?.country_code');
+    expect(html).toContain('countryName: data.country_name || data.location?.country || data.city || data.region');
+  });
+
   it('ships the new client-side guardrails and helper functions', async () => {
     const response = await runRequest(new Request('https://example.com/'));
     const html = await response.text();

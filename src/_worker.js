@@ -2567,7 +2567,7 @@ function renderHtml(initData) {
             return buildSourceSuccessResult({ ip: data.ip, isp: data.isp, countryCode: data.country_code, countryName: data.country });
           } catch (e) { return createSourceErrorResult('加载失败'); }
         },
-        // IPAPI.is 基础信息查询 (优先使用官方 API，失败后回退备用端点)
+        // IPAPI.is 基础信息查询 (优先使用官方 API，失败后回退 ipinfo.io 代理)
         fetchIpApi: async () => {
           const parseIpApiResponse = (data) => buildSourceSuccessResult({
             ip: data.ip,
@@ -2579,13 +2579,27 @@ function renderHtml(initData) {
             const res = await fetchWithTimeout('https://api.ipapi.is/', {}, 5000);
             if (!res.ok) throw new Error('Error');
             const data = await res.json();
-            return parseIpApiResponse(data);
+            return {
+              ...parseIpApiResponse(data),
+              sourceName: 'IPAPI.is',
+              sourceUrl: 'https://ipapi.is',
+            };
           } catch (e) {
             try {
-              const res = await fetchWithTimeout('https://api.ipapi.cmliussss.net/');
+              const res = await fetchWithTimeout(\`https://api.cmliussss.net/api/ipinfo?_t=\${Date.now()}\`);
               if (!res.ok) throw new Error('Error');
               const data = await res.json();
-              return parseIpApiResponse(data);
+              const result = buildSourceSuccessResult({
+                ip: data.ip,
+                isp: data.org || data.asn?.org || data.isp,
+                countryCode: data.country_code || data.country || data.location?.country_code,
+                countryName: data.country_name || data.location?.country || data.city || data.region,
+              });
+              return {
+                ...result,
+                sourceName: 'ipinfo.io',
+                sourceUrl: 'https://ipinfo.io/',
+              };
             } catch (e2) { return createSourceErrorResult('加载失败'); }
           }
         },
