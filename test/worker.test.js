@@ -257,7 +257,7 @@ describe('rendered client script', () => {
     expect(html).toContain("name: 'YouTube'");
     expect(html).toContain("name: '微信'");
     expect(html).toContain("url: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupkbps/toutiao_favicon.ico'");
-    expect(html).toContain("url: 'https://github.com/favicon.ico'");
+    expect(html).toContain("url: 'https://github.github.io/janky/images/bg_hr.png'");
     expect(html).toContain("url: 'https://www.youtube.com/generate_204'");
     expect(html).toContain("url: 'https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico'");
     expect(html).toContain("probe: 'image'");

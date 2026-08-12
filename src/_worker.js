@@ -1328,7 +1328,7 @@ function renderHtml(initData) {
           name: 'GitHub',
           countryCode: 'US',
           icon: ICONS.github,
-          url: 'https://github.com/favicon.ico',
+          url: 'https://github.github.io/janky/images/bg_hr.png',
           probe: 'image',
           cacheBust: true,
           timeout: 5000,
@@ -2567,38 +2567,38 @@ function renderHtml(initData) {
             return buildSourceSuccessResult({ ip: data.ip, isp: data.isp, countryCode: data.country_code, countryName: data.country });
           } catch (e) { return createSourceErrorResult('加载失败'); }
         },
-        // IPAPI.is 基础信息查询 (优先使用官方 API，失败后回退 ipinfo.io 代理)
+        // IP 基础信息查询 (优先使用 ipinfo.io，失败后回退 IPAPI.is)
         fetchIpApi: async () => {
-          const parseIpApiResponse = (data) => buildSourceSuccessResult({
-            ip: data.ip,
-            isp: data.asn?.org,
-            countryCode: data.location?.country_code,
-            countryName: data.location?.country,
-          });
           try {
-            const res = await fetchWithTimeout('https://api.ipapi.is/', {}, 5000);
+            const res = await fetchWithTimeout(\`https://api.cmliussss.net/api/ipinfo?_t=\${Date.now()}\`);
             if (!res.ok) throw new Error('Error');
             const data = await res.json();
+            const result = buildSourceSuccessResult({
+              ip: data.ip,
+              isp: data.org || data.asn?.org || data.isp,
+              countryCode: data.country_code || data.country || data.location?.country_code,
+              countryName: data.country_name || data.location?.country || data.city || data.region,
+            });
             return {
-              ...parseIpApiResponse(data),
-              sourceName: 'IPAPI.is',
-              sourceUrl: 'https://ipapi.is',
+              ...result,
+              sourceName: 'ipinfo.io',
+              sourceUrl: 'https://ipinfo.io/',
             };
           } catch (e) {
             try {
-              const res = await fetchWithTimeout(\`https://api.cmliussss.net/api/ipinfo?_t=\${Date.now()}\`);
+              const res = await fetchWithTimeout('https://api.ipapi.is/', {}, 5000);
               if (!res.ok) throw new Error('Error');
               const data = await res.json();
               const result = buildSourceSuccessResult({
                 ip: data.ip,
-                isp: data.org || data.asn?.org || data.isp,
-                countryCode: data.country_code || data.country || data.location?.country_code,
-                countryName: data.country_name || data.location?.country || data.city || data.region,
+                isp: data.asn?.org,
+                countryCode: data.location?.country_code,
+                countryName: data.location?.country,
               });
               return {
                 ...result,
-                sourceName: 'ipinfo.io',
-                sourceUrl: 'https://ipinfo.io/',
+                sourceName: 'IPAPI.is',
+                sourceUrl: 'https://ipapi.is',
               };
             } catch (e2) { return createSourceErrorResult('加载失败'); }
           }
